@@ -83,7 +83,10 @@ let process processors in_dir out_dir file =
   let (_,process) = List.find
     (fun (ext,_) -> Filename.check_suffix file ext) processors
   in
-  process (in_dir / file) (out_dir / file)
+  let out_file = out_dir / file in
+  (* Here, we rely on umask to attenuate the permissions. *)
+  TowerSysUtil.Dir.make_exist ~perm:0o777 (Filename.dirname out_file);
+  process (in_dir / file) out_file
 
 (* TODO: The target should be wiped (Jekyll) or checked before processing. *)
 let build in_dir out_dir =

@@ -77,3 +77,31 @@ let foldp_paths f p acc dir =
   List.fold_left (fun acc file ->
     if p file dir then f acc file else acc
   ) acc files
+
+module Dir = struct
+  module Error = struct
+    let nondirectory_segment path =
+      `Error (false, "path "^path^" is not a directory")
+  end
+
+  let rec make_exist ~perm path =
+    try Unix.access path []; None
+    with
+    | Unix.Unix_error (Unix.ENOENT, _, _) ->
+      let dir = Filename.dirname path in
+      begin match make_exist ~perm dir with
+      | None ->
+        Unix.(mkdir path perm);
+        None
+      | Some err -> Some err
+      end
+    | Unix.Unix_error (Unix.ENOTDIR, _, _) ->
+      Some (Error.nondirectory_segment path)
+
+  let make_dirs_exist ~perm =
+    List.fold_left (fun err_opt path ->
+      match err_opt with None -> make_exist ~perm path | Some err -> Some err
+    ) None
+
+  let name path = match Filename.dirname path with "." -> "" | p -> p
+end
