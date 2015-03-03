@@ -1,0 +1,22 @@
+opam-version: "1.2"
+maintainer:   "sheets@alum.mit.edu"
+authors:    [ "David Sheets" ]
+license:      "ISC"
+homepage:     "https://github.com/dsheets/tower"
+bug-reports:  "https://github.com/dsheets/tower/issues"
+dev-repo:     "https://github.com/dsheets/tower.git"
+
+build: [
+  [make]
+]
+build-test: [
+  [make "test"]
+]
+
+
+depends: [
+  "cmdliner"
+  "xmlm"
+  "omd"
+  "base-unix"
+]
