@@ -1,0 +1,7 @@
+<my-document>
+  <title>Tower: Simple XML Test</title>
+
+  <abstract>
+    A simple XML test. The time is now <t:insert name="site.time"/>.
+  </abstract>
+</my-document>
