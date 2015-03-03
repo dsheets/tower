@@ -85,19 +85,26 @@ let process processors in_dir out_dir file =
   in
   let out_file = out_dir / file in
   (* Here, we rely on umask to attenuate the permissions. *)
-  TowerSysUtil.Dir.make_exist ~perm:0o777 (Filename.dirname out_file);
-  process (in_dir / file) out_file
+  match TowerSysUtil.Dir.make_exist ~perm:0o777 (Filename.dirname out_file) with
+  | None -> `Ok (process (in_dir / file) out_file)
+  | Some err -> err
 
 (* TODO: The target should be wiped (Jekyll) or checked before processing. *)
 let build in_dir out_dir =
-  TowerSysUtil.foldp_paths
-    (fun () -> process processors in_dir out_dir)
+  let errs = TowerSysUtil.foldp_paths
+    (fun errs file -> match process processors in_dir out_dir file with
+    | `Ok () -> errs
+    | `Error (_,err) -> err::errs
+    )
     (fun file _dir ->
       List.exists (fun (ext,_) -> Filename.check_suffix file ext) processors
     )
-    ()
-    in_dir;
-  `Ok ()
+    []
+    in_dir
+  in
+  match errs with
+  | [] -> `Ok ()
+  | errs -> `Error (false, String.concat "\n" errs)
 
 let run path output =
   try
