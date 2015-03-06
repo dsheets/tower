@@ -19,4 +19,5 @@ depends: [
   "xmlm"
   "omd"
   "base-unix"
+  "stringext"
 ]

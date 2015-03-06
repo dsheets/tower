@@ -77,6 +77,15 @@ let processors = [
   ".md",   process_md;
 ]
 
+let ignorable_file full_file_name =
+  (* Currently hard-codes any file starting with . or _ as ignorable by Tower *)
+  let contains_ignorable_piece fn_piece = match String.get fn_piece 0 with
+    | '.' | '_' -> true
+    | _ -> false
+  in
+  let fn_parts = Stringext.full_split full_file_name '/' in
+  List.exists contains_ignorable_piece fn_parts
+
 let (/) = Filename.concat
 
 let process processors in_dir out_dir file =
@@ -97,7 +106,8 @@ let build in_dir out_dir =
     | `Error (_,err) -> err::errs
     )
     (fun file _dir ->
-      List.exists (fun (ext,_) -> Filename.check_suffix file ext) processors
+      List.exists (fun (ext,_) -> Filename.check_suffix file ext &&
+                                    not (ignorable_file file)) processors
     )
     []
     in_dir
