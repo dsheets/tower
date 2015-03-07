@@ -15,6 +15,8 @@
  *
  *)
 
+open Unix
+
 let (  /  ) = Filename.concat
 let ( $?. ) = Filename.check_suffix
 
@@ -102,6 +104,37 @@ module Dir = struct
     List.fold_left (fun err_opt path ->
       match err_opt with None -> make_exist ~perm path | Some err -> Some err
     ) None
+
+  (* Placeholder for now *)
+  let log msg = ()
+
+  let gather_nodes root =
+    (* By default enforce all recursive processing is done relative to
+    the cwd dir, unless overridden *)
+    let cwd = getcwd() in
+    let rec gather_nodes node =
+      let node_path = cwd / node in
+      match (lstat node_path).st_kind with
+      | S_DIR -> let subnodes = (Sys.readdir node) in
+                 let gathered = Array.map (fun subnode -> gather_nodes (node / subnode)) subnodes in
+                 (* Careful here so parents always come after descendants *)
+                 Array.append (Array.fold_left Array.append [||] gathered) [|node|]
+      | _ -> [|node|]
+    in
+    gather_nodes root
+
+  let rmdir_r path =
+    if Sys.file_exists path then
+      let remove_node node =
+        if Sys.file_exists node then
+          match (lstat node).st_kind with
+          | S_DIR -> rmdir node
+          | S_REG -> unlink node
+          | _ -> unlink node
+      in
+      (* Walk the full tree first, then process results, prevent
+      partially-computed results in case of an error walking. *)
+      Array.iter remove_node (gather_nodes path)
 
   let name path = match Filename.dirname path with "." -> "" | p -> p
 end
