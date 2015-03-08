@@ -1,0 +1,12 @@
+dependencies:
+    pre:
+      - "wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh"
+
+machine:
+  environment:
+    OCAML_VERSION: latest
+    PACKAGE: tower
+
+test:
+  override:
+    - bash -ex .travis-opam.sh
