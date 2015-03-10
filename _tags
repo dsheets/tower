@@ -1,3 +1,3 @@
-<cli/*>: package(cmdliner),package(unix),package(xmlm),package(omd)
+<cli/*>: package(cmdliner),package(unix),package(xmlm),package(omd),package(stringext)
 <lib/*>: package(xmlm),package(omd)
 true: debug, annot, bin_annot, principal, safe_string
