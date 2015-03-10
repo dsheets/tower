@@ -43,4 +43,8 @@ module Dir : sig
     string list -> [> `Error of bool * string ] option
 
   val name : string -> string
+
+  (* Should this be something better? Bool? Error of bool * string? *)
+  val rmdir_r :
+    string -> unit
 end
